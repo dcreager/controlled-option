@@ -1,0 +1,44 @@
+name: Continuous integration
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 0 1,15 * *"
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable]
+
+    steps:
+      - name: Install Rust environment
+        uses: hecrj/setup-rust-action@v1
+        with:
+          rust-version: ${{ matrix.rust }}
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo
+            target
+          key: ${{ runner.OS }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.OS }}-cargo-
+      - name: Install cargo-valgrind
+        run: |
+          sudo apt-get install -y valgrind
+          cargo install cargo-valgrind
+      - name: Build library
+        run: cargo build
+      - name: Run test suite
+        run: cargo test
+      - name: Run test suite under valgrind
+        run: cargo valgrind test
