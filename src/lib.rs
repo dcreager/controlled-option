@@ -65,6 +65,7 @@ pub trait Niche: Sized {
 ///
 /// [parent]: index.html
 #[repr(transparent)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ControlledOption<T>
 where
     T: Niche,
@@ -119,6 +120,26 @@ where
     #[inline]
     pub fn into_option(self) -> Option<T> {
         self.into()
+    }
+}
+
+impl<T> Default for ControlledOption<T>
+where
+    T: Niche,
+{
+    #[inline]
+    fn default() -> ControlledOption<T> {
+        ControlledOption::none()
+    }
+}
+
+impl<T> From<T> for ControlledOption<T>
+where
+    T: Niche,
+{
+    #[inline]
+    fn from(value: T) -> ControlledOption<T> {
+        ControlledOption::some(value)
     }
 }
 
