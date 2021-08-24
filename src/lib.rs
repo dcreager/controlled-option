@@ -67,7 +67,6 @@ pub trait Niche: Sized {
 ///
 /// [parent]: index.html
 #[repr(transparent)]
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct ControlledOption<T>
 where
     T: Niche,
@@ -169,6 +168,133 @@ where
         } else {
             Some(T::from_some(self.value))
         }
+    }
+}
+
+// Normally we would #[derive] all of these traits, but the auto-derived implementations all
+// require that T implement the trait as well.  In our case, we (usually) need T::Output to
+// implement the traits, not T itself.
+
+impl<T> Clone for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: Clone,
+{
+    fn clone(&self) -> Self {
+        ControlledOption {
+            value: self.value.clone(),
+        }
+    }
+}
+
+impl<T> Copy for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: Copy,
+{
+}
+
+impl<T> std::fmt::Debug for ControlledOption<T>
+where
+    T: std::fmt::Debug + Niche,
+    T::Output: Clone,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if self.is_none() {
+            write!(f, "ControlledOption::None")
+        } else {
+            f.debug_tuple("ControlledOption::Some")
+                .field(&T::from_some(self.value.clone()))
+                .finish()
+        }
+    }
+}
+
+impl<T> PartialEq for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.value.eq(&other.value)
+    }
+
+    fn ne(&self, other: &Self) -> bool {
+        self.value.ne(&other.value)
+    }
+}
+
+impl<T> Eq for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: Eq,
+{
+}
+
+impl<T> PartialOrd for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: PartialOrd,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+
+    fn lt(&self, other: &Self) -> bool {
+        self.value.lt(&other.value)
+    }
+
+    fn le(&self, other: &Self) -> bool {
+        self.value.le(&other.value)
+    }
+
+    fn gt(&self, other: &Self) -> bool {
+        self.value.gt(&other.value)
+    }
+
+    fn ge(&self, other: &Self) -> bool {
+        self.value.ge(&other.value)
+    }
+}
+
+impl<T> Ord for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: Ord,
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.value.cmp(&other.value)
+    }
+
+    fn max(self, other: Self) -> Self {
+        ControlledOption {
+            value: self.value.max(other.value),
+        }
+    }
+
+    fn min(self, other: Self) -> Self {
+        ControlledOption {
+            value: self.value.min(other.value),
+        }
+    }
+
+    fn clamp(self, min: Self, max: Self) -> Self {
+        ControlledOption {
+            value: self.value.clamp(min.value, max.value),
+        }
+    }
+}
+
+impl<T> std::hash::Hash for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: std::hash::Hash,
+{
+    fn hash<H>(&self, state: &mut H)
+    where
+        H: std::hash::Hasher,
+    {
+        self.value.hash(state)
     }
 }
 
