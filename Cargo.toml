@@ -1,6 +1,6 @@
 [package]
 name = "controlled-option"
-version = "0.1.0"
+version = "0.2.0"
 description = "Custom Option type with explicit control over niches and memory layout"
 homepage = "https://github.com/dcreager/controlled-option"
 repository = "https://github.com/dcreager/controlled-option"
