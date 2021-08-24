@@ -1,6 +1,6 @@
 [package]
 name = "controlled-option-macros"
-version = "0.1.0"
+version = "0.2.1"
 description = "Procedural macros for the controlled-option crate"
 homepage = "https://github.com/dcreager/controlled-option"
 repository = "https://github.com/dcreager/controlled-option"
