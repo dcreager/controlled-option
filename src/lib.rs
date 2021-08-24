@@ -25,6 +25,8 @@
 //! [`Option`]: https://doc.rust-lang.org/std/option/enum.Option.html
 //! [_niches_]: https://rust-lang.github.io/unsafe-code-guidelines/glossary.html#niche
 
+use std::alloc::Layout;
+
 /// A type should implement `Niche` if its memory representation has any bit patterns that do not
 /// represent valid values.  If so, one of those can be used to represent the `None` case of an
 /// option.
@@ -168,6 +170,42 @@ where
             Some(T::from_some(self.value))
         }
     }
+}
+
+//-------------------------------------------------------------------------------------------------
+// Structs
+//
+// The ‘controlled-option-macros’ crate provides a derive macro for the ‘Niche’ trait.  The derived
+// implementation depends on the following functions to get access to the field that you want to
+// use as the struct's niche.
+
+/// Automatically derives a [`Niche`][] implementation for a struct type.
+///
+/// You must mark one of the fields with a `#[niche]` attribute.  This field's type must already
+/// implement [`Niche`][].  The `None` value for the struct will be uninitialized memory, except
+/// for the chosen field, which will be filled in with its `None` niche value.  (This requires that
+/// the [`Niche`][] implementation for the field's type must have the same layout for its `Self`
+/// and `Output` types.)
+pub use controlled_option_macros::Niche;
+
+#[doc(hidden)]
+pub fn fill_struct_field_with_none<T>(field: *mut T)
+where
+    T: Niche,
+{
+    debug_assert!(Layout::new::<T>() == Layout::new::<T::Output>());
+    let repr = field as *mut T::Output;
+    unsafe { repr.write(T::none()) };
+}
+
+#[doc(hidden)]
+pub fn struct_field_is_none<T>(field: *const T) -> bool
+where
+    T: Niche,
+{
+    debug_assert!(Layout::new::<T>() == Layout::new::<T::Output>());
+    let repr = field as *const T::Output;
+    T::is_none(unsafe { &*repr })
 }
 
 //-------------------------------------------------------------------------------------------------

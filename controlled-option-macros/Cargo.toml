@@ -1,7 +1,7 @@
 [package]
-name = "controlled-option"
+name = "controlled-option-macros"
 version = "0.1.0"
-description = "Custom Option type with explicit control over niches and memory layout"
+description = "Procedural macros for the controlled-option crate"
 homepage = "https://github.com/dcreager/controlled-option"
 repository = "https://github.com/dcreager/controlled-option"
 readme = "README.md"
@@ -10,8 +10,9 @@ authors = ["Douglas Creager <dcreager@dcreager.net>"]
 edition = "2018"
 
 [lib]
-# All of our tests are in the tests/it "integration" test executable.
-test = false
+proc-macro = true
 
 [dependencies]
-controlled-option-macros = { version="=0.1.0", path="controlled-option-macros" }
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version="1.0", features=["full"] }
