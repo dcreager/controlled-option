@@ -187,6 +187,13 @@ where
     }
 }
 
+impl<T> Copy for ControlledOption<T>
+where
+    T: Niche,
+    T::Output: Copy,
+{
+}
+
 impl<T> std::fmt::Debug for ControlledOption<T>
 where
     T: std::fmt::Debug + Niche,
