@@ -110,3 +110,28 @@ fn can_option_tuple_structs() {
     assert_eq!(some_repr.0, 75);
     assert_eq!(some_repr.1, 125);
 }
+
+// Same as above, but with type parameters.
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Niche)]
+struct TestGenericStruct<T>(T, #[niche] T);
+
+#[repr(C)]
+#[derive(Debug)]
+struct TestGenericStructRepr<T>(T, T);
+
+#[test]
+fn can_option_generic_structs() {
+    let none = ControlledOption::<TestGenericStruct<NonZeroU32>>::none();
+    assert!(none.is_none());
+    let none_repr: TestGenericStructRepr<u32> = unsafe { std::mem::transmute(none) };
+    assert_eq!(none_repr.1, 0);
+
+    let value = TestGenericStruct(NonZeroU32::new(75).unwrap(), NonZeroU32::new(125).unwrap());
+    let some = ControlledOption::some(value);
+    assert!(some.is_some());
+    let some_repr: TestGenericStructRepr<u32> = unsafe { std::mem::transmute(some) };
+    assert_eq!(some_repr.0, 75);
+    assert_eq!(some_repr.1, 125);
+}
